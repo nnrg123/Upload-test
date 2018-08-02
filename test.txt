@@ -1,0 +1,22 @@
+
+Test Begin-------------------------------------------------------------------
+
+When designing the BigQuery ML backend, the team was faced with a dilemma. Transferring large amounts of data from BigQuery servers to special-purpose servers running machine learning algorithms would be time-consuming and would incur an overhead in terms of security and privacy considerations. However, because the core components of gradient descent — an optimization method that is the workhorse of machine learning algorithms — can be implemented using common SQL operations*, we were able to repurpose the existing BigQuery SQL processing engine for BigQuery ML. 
+
+
+-----------------------------------------------------------------------------
+
+
+
+Since the BigQuery engine is designed to efficiently scan large datasets rather than randomly draw small samples from them, BigQuery ML is based on the standard (batch) variant of gradient descent rather than the stochastic version. And while stochastic gradient descent is far more common in today’s large-scale machine learning systems, the batch variant has numerous practical advantages.
+
+
+------------------------------------------------------------------------------
+
+
+For example, in-database machine learning systems based on stochastic gradient descent process examples one by one, and can perform poorly when the data is suboptimally ordered. But BigQuery data is often distributed on disk so as to optimize the performance of regular SQL queries, and continually redistributing the data to support stochastic machine learning algorithms would be computationally expensive. In contrast, batch gradient descent is insensitive to the ordering and partitioning of data on disk, thereby completely circumventing this problem. Also, batch methods can be combined with line search techniques from the classical optimization literature, leading to a learning algorithm that is more stable and requires less fine tuning. Using line search with stochastic methods is far trickier. Our implementation also includes support for regularization and preconditioning. For more details, please see our paper.
+
+------------------------------------------------------------------------------
+
+Test End
+
